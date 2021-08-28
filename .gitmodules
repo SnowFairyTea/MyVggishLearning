@@ -1,3 +1,6 @@
 [submodule "AudiosetLabelSelector"]
 	path = AudiosetLabelSelector
 	url = https://github.com/SnowFairyTea/AudiosetLabelSelector
+[submodule "GetAudiosetSample"]
+	path = GetAudiosetSample
+	url = https://github.com/SnowFairyTea/GetAudiosetSample
