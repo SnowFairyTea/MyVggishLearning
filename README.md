@@ -1,0 +1,2 @@
+# MyVggishLearning
+Vggish、pytorchを用いた転移学習を学習します
