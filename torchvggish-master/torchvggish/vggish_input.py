@@ -64,6 +64,8 @@ def waveform_to_examples(data, sample_rate, return_tensor=True):
         upper_edge_hertz=vggish_params.MEL_MAX_HZ)
 
     # Frame features into examples.
+    
+    #1/0.010=100をサンプルレートにしてる(0.1s)
     features_sample_rate = 1.0 / vggish_params.STFT_HOP_LENGTH_SECONDS
     example_window_length = int(round(
         vggish_params.EXAMPLE_WINDOW_SECONDS * features_sample_rate))
