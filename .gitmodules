@@ -4,5 +4,7 @@
 [submodule "GetAudiosetSample"]
 	path = GetAudiosetSample
 	url = https://github.com/SnowFairyTea/GetAudiosetSample
-[submodule "submod-repo"]
+[submodule "AudiosetLabelSelector"]
+	ignore = dirty
+[submodule "GetAudiosetSample"]
 	ignore = dirty
