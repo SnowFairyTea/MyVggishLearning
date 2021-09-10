@@ -6,5 +6,7 @@
 	url = https://github.com/SnowFairyTea/GetAudiosetSample
 [submodule "AudiosetLabelSelector"]
 	ignore = dirty
+	branch = main
 [submodule "GetAudiosetSample"]
 	ignore = dirty
+	branch = main
