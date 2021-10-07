@@ -20,10 +20,10 @@ class VGG(nn.Module):
 #0803,クラスフィルタ層を追加してみる        #意味なかった
 #0915 クラスフィルタ層を埋め込んでみる
         self.classfilter=nn.Sequential(
-            nn.Linear(128,64),
-            nn.Sigmoid(),
-            nn.Linear(64,5),
-            nn.Softmax()
+        #    nn.Linear(128,64),
+        #    nn.Sigmoid(),
+        #    nn.Linear(64,5),
+        #    nn.Softmax()
         )
 
     def forward(self, x):
