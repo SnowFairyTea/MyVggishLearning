@@ -1,2 +1,6 @@
 Speech
 Music
+Silence
+Siren
+Vehicle
+Wind
