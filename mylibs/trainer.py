@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 import torch.optim as optim
+import random
 from . import myenv
 
 
@@ -133,6 +134,7 @@ class trainer:
                 self.x.append(epoch_acc)
                 self.y.append(epoch)
     
+
     def graph(self,_title):
         plt.plot(self.y[::2],[i.tolist() for i in self.x][::2], label="train", color ="Green")
         plt.plot(self.y[::2],[i.tolist() for i in self.x][1::2], label="valid", color ="Blue")

@@ -9,10 +9,11 @@ import traceback
 vggish_input=import_module(".torchvggish.vggish_input","torchvggish-master")
 
 
-def get_dataloader_dict(classes,dataset_dir="GetAudiosetSample/result",batch_size=10):
+def get_dataloader_dict(classes,dataset_dir="GetAudiosetSample/result",batch_size=10,datatype="train"):
     mydir=os.path.dirname(os.path.abspath(__file__))
 
-    DataLoaderName=""
+    
+    DataLoaderName=datatype
 
     for i in sorted(classes):
         DataLoaderName+=i
