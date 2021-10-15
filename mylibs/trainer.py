@@ -73,7 +73,8 @@ class trainer:
         #エポック数
         self.num_epochs=_num_epochs
         self.x=[]
-        self.y=[]
+        self.y_acc=[]
+        self.y_loss=[]
         
         
         for epoch in range(self.num_epochs):
@@ -131,13 +132,24 @@ class trainer:
                 epoch_acc=epoch_corrects.double()/len(dataloader_dict[phase].dataset)
 
                 dbprint('{} Loss: {:f} Acc: {:f}'.format(phase, epoch_loss, epoch_acc))
-                self.x.append(epoch_acc)
-                self.y.append(epoch)
+                self.y_acc.append(epoch_acc)
+                self.x.append(epoch)
+                self.y_loss.append(epoch_loss)
     
 
-    def graph(self,_title):
-        plt.plot(self.y[::2],[i.tolist() for i in self.x][::2], label="train", color ="Green")
-        plt.plot(self.y[::2],[i.tolist() for i in self.x][1::2], label="valid", color ="Blue")
-        plt.legend(loc='upper left')
-        plt.title(_title)
-        plt.show()
+    def graph(self,_title="",acc=True,loss=True):
+        if(acc):
+            plt.plot(self.x[::2],[i.tolist() for i in self.y_acc][::2], label="train", color ="Green")
+            plt.plot(self.x[::2],[i.tolist() for i in self.y_acc][1::2], label="valid", color ="Blue")
+            plt.legend(loc='upper left')
+            plt.xlabel("epoch")
+            plt.ylabel("正解率")
+            plt.title(_title+"正解率の推移")
+            plt.show()
+        if(loss):
+            plt.plot(self.x[::2],[i.tolist() for i in self.y_loss][::2], label="train", color ="Green")
+            plt.plot(self.x[::2],[i.tolist() for i in self.y_loss][1::2], label="valid", color ="Blue")
+            plt.legend(loc='upper left')
+            plt.xlabel("epoch")
+            plt.ylabel("loss")
+            plt.title(_title+"損失関数の値の推移")
