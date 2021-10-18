@@ -9,7 +9,10 @@ from . import vggish_input, vggish_params
 class VGG(nn.Module):
     def __init__(self, features):
         super(VGG, self).__init__()
+        #畳み込み層
         self.features = features
+        #全結合層
+        ##埋め込み層
         self.embeddings = nn.Sequential(
             nn.Linear(512 * 4 * 6, 4096),
             nn.ReLU(True),
@@ -19,6 +22,7 @@ class VGG(nn.Module):
             nn.ReLU(True))
 #0803,クラスフィルタ層を追加してみる        #意味なかった
 #0915 クラスフィルタ層を埋め込んでみる
+##識別層
         self.classfilter=nn.Sequential(
         #    nn.Linear(128,64),
         #    nn.Sigmoid(),
@@ -28,7 +32,7 @@ class VGG(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-
+        
         # Transpose the output from features to
         # remain compatible with vggish embeddings
         x = torch.transpose(x, 1, 3)
