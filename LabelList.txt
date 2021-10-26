@@ -1,6 +1,8 @@
 Speech
 Music
-Silence
+Car
 Siren
 Vehicle
 Wind
+Animal
+Dog

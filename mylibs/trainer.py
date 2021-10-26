@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import torch.optim as optim
 import random
 from . import myenv
-
+import pandas as pd
 
 class trainer:
     def __init__(self, 
@@ -67,6 +67,8 @@ class trainer:
         self.criterion=_criterion
         self.optimizer=_optimizer(self.params_to_update, self.lr,self.weight_decay)
         dbprint(self.model)
+        
+        self.kondou= None
                 
     def train(self,dataloader_dict,_num_epochs=50,_print=False):
         dbprint=(lambda x:print(x)) if _print else (lambda x:None)
@@ -153,3 +155,53 @@ class trainer:
             plt.xlabel("epoch")
             plt.ylabel("loss")
             plt.title(_title+"loss")
+    
+    def eval(self, dataloader_dict,labels,mode="kondou"):
+        if (mode=="0" or mode=="kondou"):
+            self.kondou=np.zeros((len(labels),len(labels)))
+            model=tr.model
+            acc=0
+            count=0.0
+            for inputs,la in dataloader_dict["train"]:
+
+                model.eval()
+
+                output = model(inputs)
+                for h in range(len(output)):
+                    #print("模範解答",labels[la[h].item()])
+                    ans=[[i,output[h][i].item()] for i in range(len(labels))]
+                    ans.sort(key=lambda x: x[1],reverse=True)
+                    acc+=1 if (ans[0][0]==la[h])else 0
+                    count+=1
+                    #せいかい、しゅつりょく
+                    self.kondou[la[h]][ans[0][0]]+=1
+
+        print("正解数/入力数:{}/{:.0f}".format(acc,count))
+        print("正解率:{:.3f}".format(acc/count))
+
+        
+        return self.kondou
+        
+        elif (mode=="1"or mode=="kakuritu"):
+            model=tr.model
+            inputs,la = iter(dataloader_dict["train"]).__next__()
+            model.eval()
+
+            output = model(inputs)
+            for h in range(len(output)):
+                print("模範解答",labels[la[h].item()])
+                ans=[[labels[i],output[h][i].item()] for i in range(len(labels))]
+                ans.sort(key=lambda x: x[1],reverse=True)
+                [print("{:7}:{:.5f}".format(ans[i][0],ans[i][1])) for i in range(len(ans))]
+                print("----------------")
+        
+        else:
+            print("mode=",mode)
+            print("は未定義です")
+
+    def getKondou(self,csvname="a"):
+        df=pd.DataFrame(self.kondou)
+        df.index=labels
+        df.columns=labels
+        df.to_csv('kondou\\'+csvname+'.csv')
+        print(df)
