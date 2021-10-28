@@ -9,14 +9,16 @@ import traceback
 vggish_input=import_module(".torchvggish.vggish_input","torchvggish-master")
 
 
-def get_dataloader_dict(classes,dataset_dir="GetAudiosetSample/result",batch_size=10,datatype="train"):
+def get_dataloader_dict(classes,dataset_dir="GetAudiosetSample/result",batch_size=10,datatype="train",num_data=None):
     mydir=os.path.dirname(os.path.abspath(__file__))
 
-    
+    #一意な名前を作成
     DataLoaderName=datatype
-
+    if(num_data!=None):
+        DataLoaderName+=str(num_data)
     for i in sorted(classes):
         DataLoaderName+=i
+
     DataLoaderName+=".jb"
     print(mydir+"\dataloaders",glob.glob(mydir+"\dataloaders\*"))
     if (mydir+"\dataloaders\\"+DataLoaderName in glob.glob(mydir+"\dataloaders\*") ):
@@ -24,7 +26,7 @@ def get_dataloader_dict(classes,dataset_dir="GetAudiosetSample/result",batch_siz
         dataloader_dict=joblib.load(mydir+"\dataloaders\\"+DataLoaderName)
     else:
         print("新しく作ります")
-        dataloader_dict=create_dataloader_dict(classes,dataset_dir,batch_size)
+        dataloader_dict=create_dataloader_dict(classes,dataset_dir,batch_size,num_data)
         # 保存
         joblib.dump(dataloader_dict, mydir+"\dataloaders\\"+DataLoaderName, compress=3)
 
@@ -33,8 +35,8 @@ def get_dataloader_dict(classes,dataset_dir="GetAudiosetSample/result",batch_siz
 
     return dataloader_dict
 
-def create_dataloader_dict(classes,dataset_dir,batch_size):
-    path_dict = make_path_dict(classes, dataset_dir)
+def create_dataloader_dict(classes,dataset_dir,batch_size,num_data):
+    path_dict = make_path_dict(classes, dataset_dir,num_data)
 
     #DataSetを実際に作ってみる 
     train_dataset = MyDataset(
@@ -66,7 +68,7 @@ def create_dataloader_dict(classes,dataset_dir,batch_size):
 
 
 
-def make_path_dict(classes, dataset_dir):
+def make_path_dict(classes, dataset_dir,num_data=None):
 
     #データへのファイルパスとラベルを格納したリストを取得する
     #path_dict = make_path_list()
@@ -78,11 +80,13 @@ def make_path_dict(classes, dataset_dir):
         file_list=os.listdir(dir_name)
         
         #8割を学習用、残りを検証用にする
-        num_data = len(file_list)
+        if (num_data == None):
+            num_data = len(file_list)
+        
         num_split = int(num_data*0.8)
         
         train_file_list += [[os.path.join(dir_name, file).replace('\\', '/'), i] for file in file_list[:num_split] ]
-        valid_file_list += [[os.path.join(dir_name, file).replace('\\', '/'), i] for file in file_list[num_split:]]
+        valid_file_list += [[os.path.join(dir_name, file).replace('\\', '/'), i] for file in file_list[num_split:num_data]]
     return {"train":train_file_list,"valid":valid_file_list}
 
 

@@ -74,9 +74,9 @@ class trainer:
         dbprint=(lambda x:print(x)) if _print else (lambda x:None)
         #エポック数
         self.num_epochs=_num_epochs
-        self.x=[]
-        self.y_acc=[]
-        self.y_loss=[]
+        self.x={"train":[],"valid":[]}
+        self.y_acc={"train":[],"valid":[]}
+        self.y_loss={"train":[],"valid":[]}
         
         
         for epoch in range(self.num_epochs):
@@ -134,23 +134,24 @@ class trainer:
                 epoch_acc=epoch_corrects.double()/len(dataloader_dict[phase].dataset)
 
                 dbprint('{} Loss: {:f} Acc: {:f}'.format(phase, epoch_loss, epoch_acc))
-                self.y_acc.append(epoch_acc)
-                self.x.append(epoch)
-                self.y_loss.append(epoch_loss)
+                self.x[phase].append(epoch)
+                self.y_acc[phase].append(epoch_acc.item())
+                self.y_loss[phase].append(epoch_loss)
+                print(epoch,phase,epoch_loss)
     
 
     def graph(self,_title="",acc=True,loss=True):
         if(acc):
-            plt.plot(self.x[::2],[i.tolist() for i in self.y_acc][::2], label="train", color ="Green")
-            plt.plot(self.x[::2],[i.tolist() for i in self.y_acc][1::2], label="valid", color ="Blue")
+            plt.plot(self.x["train"],self.y_acc["train"], label="train", color ="Green")
+            plt.plot(self.x["valid"],self.y_acc["valid"], label="valid", color ="Blue")#i.tolist()[i for i in self.y_acc["train"]]
             plt.legend(loc='upper left')
             plt.xlabel("epoch")
             plt.ylabel("acc")
             plt.title(_title+"acc")
             plt.show()
         if(loss):
-            plt.plot(self.x[::2],[i for i in self.y_loss][::2], label="train", color ="Green")
-            plt.plot(self.x[::2],[i for i in self.y_loss][1::2], label="valid", color ="Blue")
+            plt.plot(self.x["train"],self.y_loss["train"], label="train", color ="Green")
+            plt.plot(self.x["valid"],self.y_loss["valid"], label="valid", color ="Blue")
             plt.legend(loc='upper left')
             plt.xlabel("epoch")
             plt.ylabel("loss")
@@ -176,11 +177,11 @@ class trainer:
                     #せいかい、しゅつりょく
                     self.kondou[la[h]][ans[0][0]]+=1
 
-        print("正解数/入力数:{}/{:.0f}".format(acc,count))
-        print("正解率:{:.3f}".format(acc/count))
+            print("正解数/入力数:{}/{:.0f}".format(acc,count))
+            print("正解率:{:.3f}".format(acc/count))
 
+            return self.kondou
         
-        return self.kondou
         
         elif (mode=="1"or mode=="kakuritu"):
             model=tr.model
@@ -205,3 +206,5 @@ class trainer:
         df.columns=labels
         df.to_csv('kondou\\'+csvname+'.csv')
         print(df)
+    
+    
