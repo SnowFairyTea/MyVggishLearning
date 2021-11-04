@@ -5,13 +5,15 @@ import torch.optim as optim
 import random
 from . import myenv
 import pandas as pd
+import os,sys
 
 class trainer:
     def __init__(self, 
+                _labels=["Speech","Music","Silence","Siren","Vehicle","Wind"],
                 _classfilter=nn.Sequential(
                             nn.Linear(128,64),
                             nn.Sigmoid(),
-                            nn.Linear(64,5),
+                            nn.Linear(64,6),
                             nn.Softmax(dim=1)
                             ), 
                 _criterion=nn.CrossEntropyLoss(),
@@ -48,6 +50,7 @@ class trainer:
         self.model = torch.hub.load('torchvggish-master_changed', 'vggish', source='local', preprocess=False,postprocess=False)
         self.model.classfilter=_classfilter
 
+        self.labels=_labels
         
         self.model=self.model.to(myenv.device)
         self.model.eval()
@@ -132,12 +135,15 @@ class trainer:
                 #epochのlossと正解数の表示
                 epoch_loss=epoch_loss/len(dataloader_dict[phase].dataset)
                 epoch_acc=epoch_corrects.double()/len(dataloader_dict[phase].dataset)
+                #関連数値を表示
+                print("epoch_loss:{}\nepoch_corrects:{},epochsize:{}".format(epoch_loss,epoch_corrects.double(),len(dataloader_dict[phase].dataset)))
 
                 dbprint('{} Loss: {:f} Acc: {:f}'.format(phase, epoch_loss, epoch_acc))
                 self.x[phase].append(epoch)
                 self.y_acc[phase].append(epoch_acc.item())
                 self.y_loss[phase].append(epoch_loss)
-                print(epoch,phase,epoch_loss)
+                #配列に入れた値を確認
+                #print(epoch,phase,epoch_loss)
     
 
     def graph(self,_title="",acc=True,loss=True):
@@ -157,9 +163,9 @@ class trainer:
             plt.ylabel("loss")
             plt.title(_title+"loss")
     
-    def eval(self, dataloader_dict,labels,mode="kondou"):
+    def eval(self, dataloader_dict,mode="kondou"):
         if (mode=="0" or mode=="kondou"):
-            self.kondou=np.zeros((len(labels),len(labels)))
+            self.kondou=np.zeros((len(self.labels),len(self.labels)))
             model=tr.model
             acc=0
             count=0.0
@@ -170,7 +176,7 @@ class trainer:
                 output = model(inputs)
                 for h in range(len(output)):
                     #print("模範解答",labels[la[h].item()])
-                    ans=[[i,output[h][i].item()] for i in range(len(labels))]
+                    ans=[[i,output[h][i].item()] for i in range(len(self.labels))]
                     ans.sort(key=lambda x: x[1],reverse=True)
                     acc+=1 if (ans[0][0]==la[h])else 0
                     count+=1
@@ -190,8 +196,8 @@ class trainer:
 
             output = model(inputs)
             for h in range(len(output)):
-                print("模範解答",labels[la[h].item()])
-                ans=[[labels[i],output[h][i].item()] for i in range(len(labels))]
+                print("模範解答",self.labels[la[h].item()])
+                ans=[[self.labels[i],output[h][i].item()] for i in range(len(self.labels))]
                 ans.sort(key=lambda x: x[1],reverse=True)
                 [print("{:7}:{:.5f}".format(ans[i][0],ans[i][1])) for i in range(len(ans))]
                 print("----------------")
@@ -202,9 +208,23 @@ class trainer:
 
     def getKondou(self,csvname="a"):
         df=pd.DataFrame(self.kondou)
-        df.index=labels
-        df.columns=labels
+        df.index=self.labels
+        df.columns=self.labels
         df.to_csv('kondou\\'+csvname+'.csv')
         print(df)
     
-    
+    def saveModel(self,addname=""):
+        mydir=os.path.dirname(os.path.abspath(__file__))
+        classstr=str(self.model.classfilter).replace("\n","").replace(" ","").replace(":","").replace(",","").replace("(","").replace(")","")
+        filename="".join(self.labels)+classstr+addname+".pth"
+        filepath=os.path.join(mydir,"models",filename)
+        torch.save(self.model.state_dict(), filepath)
+
+    def loadModel(self,addname=""):
+        mydir=os.path.dirname(os.path.abspath(__file__))
+        classstr=str(self.model.classfilter).replace("\n","").replace(" ","").replace(":","").replace(",","").replace("(","").replace(")","")
+        filename="".join(self.labels)+classstr+addname+".pth"
+        filepath=os.path.join(mydir,"models",filename)
+        self.model.load_state_dict(torch.load(filepath))
+
+

@@ -2,5 +2,7 @@
 */result/*
 */target/*
 */dataloaders/*
+*/models/*
 __pycache__/*
 *.jb
+*.pth
