@@ -3,6 +3,4 @@ Music
 Car
 Siren
 Vehicle
-Wind
 Animal
-Dog

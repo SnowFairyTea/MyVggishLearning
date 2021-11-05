@@ -76,17 +76,20 @@ def make_path_dict(classes, dataset_dir,num_data=None):
     train_file_list=[]
     valid_file_list=[]
     for i in range(len(classes)):
-        dir_name=os.path.join(dataset_dir,classes[i]).replace("\\","/")
-        file_list=os.listdir(dir_name)
-        
-        #8割を学習用、残りを検証用にする
+        train_dir=os.path.join(dataset_dir,"balanced_train",classes[i]).replace("\\","/")
+        valid_dir=os.path.join(dataset_dir,"eval",classes[i]).replace("\\","/")
+
+        train_file_list=os.listdir(train_dir)
+        valid_file_list=os.listdir(valid_dir)
+
+        #学習用の数の半分を検証用にする
         if (num_data == None):
             num_data = len(file_list)
         
-        num_split = int(num_data*0.8)
+        num_valid = int(num_data*0.8)
         
-        train_file_list += [[os.path.join(dir_name, file).replace('\\', '/'), i] for file in file_list[:num_split] ]
-        valid_file_list += [[os.path.join(dir_name, file).replace('\\', '/'), i] for file in file_list[num_split:num_data]]
+        train_file_list += [[os.path.join(train_dir, file).replace('\\', '/'), i] for file in file_list[:num_data] ]
+        valid_file_list += [[os.path.join(valid_dir, file).replace('\\', '/'), i] for file in file_list[:num_valid]]
     return {"train":train_file_list,"valid":valid_file_list}
 
 
