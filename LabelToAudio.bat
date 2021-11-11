@@ -1,4 +1,4 @@
-call python AudiosetLabelSelector/select.py LabelList.txt 1000,700,1
+call python AudiosetLabelSelector/select.py LabelList.txt 1000 1000 1
 
 cd GetAudiosetSample
 
