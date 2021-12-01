@@ -56,7 +56,7 @@ def create_dataloader_dict(classes,dataset_dir,batch_size,num_data):
         train_dataset, batch_size = batch_size, shuffle=True
     )
     valid_dataloader=data.DataLoader(
-        valid_dataset, batch_size = batch_size//2, shuffle=True
+        valid_dataset, batch_size = batch_size, shuffle=True
     )
 
     dataloader_dict={
@@ -70,27 +70,46 @@ def create_dataloader_dict(classes,dataset_dir,batch_size,num_data):
 
 def make_path_dict(classes, dataset_dir,num_data=None):
 
-    #データへのファイルパスとラベルを格納したリストを取得する
-    #path_dict = make_path_list()
-
-    train_file_list=[]
-    valid_file_list=[]
-    for i in range(len(classes)):
+    def add1dir(classnum,targetlabel,num_data,train_path_list,valid_path_list,i):
         train_dir=os.path.join(dataset_dir,"balanced_train",classes[i]).replace("\\","/")
         valid_dir=os.path.join(dataset_dir,"eval",classes[i]).replace("\\","/")
 
         train_file_list=os.listdir(train_dir)
         valid_file_list=os.listdir(valid_dir)
 
-        #学習用の数の半分を検証用にする
+        #学習用の数の0.8を検証用の数にする
         if (num_data == None):
-            num_data = len(file_list)
+            num_data = len(train_file_list)
         
         num_valid = int(num_data*0.8)
         
-        train_file_list += [[os.path.join(train_dir, file).replace('\\', '/'), i] for file in file_list[:num_data] ]
-        valid_file_list += [[os.path.join(valid_dir, file).replace('\\', '/'), i] for file in file_list[:num_valid]]
-    return {"train":train_file_list,"valid":valid_file_list}
+        train_path_list += [[os.path.join(train_dir, filename).replace('\\', '/'), classnum] for filename in train_file_list[:num_data] ]
+        valid_path_list += [[os.path.join(valid_dir, filename).replace('\\', '/'), classnum] for filename in valid_file_list[:num_valid]]
+        for t in range(4):
+            print("train[0]:",train_file_list[t])
+            print("valid[0]:",valid_file_list[t])
+
+    #データへのファイルパスとラベルを格納したリストを取得する
+    #path_dict = make_path_list()
+
+    train_path_list=[]
+    valid_path_list=[]
+    for classnum in range(len(classes)):
+        cs=classes[classnum]
+        if (type(cs)==list):
+            for label in cs:
+                print(cs,label)
+                add1dir(classnum,label,num_data,train_path_list,valid_path_list,classnum)
+        else:
+            print(cs)
+            add1dir(classnum,cs,num_data,train_path_list,valid_path_list,classnum)
+
+        
+        print("class:",classes[classnum])
+
+    print("train,valid:",len(train_path_list),",",len(valid_path_list))
+    return {"train":train_path_list,"valid":valid_path_list}
+
 
 
 #print('学習データファイル数 : ', len(path_dict["train"]))
@@ -105,17 +124,20 @@ class MyDataset(data.Dataset):
     '''
     data_dictは[パス,番号]
     '''
-    def __init__(self, path_dict,  phase='train'):
+    def __init__(self, path_dict,  phase='train',num_data= None):
         #self.data_dict = data_dict
         self.data_dict = []
+
+        counter=[]
+
         for path, label in path_dict:
             #なんかエラー出るからむしする
             try:
-                for data in vggish_input.wavfile_to_examples(path):
+                for data in vggish_input.wavfile_to_examples(path) [:5]:
                     #print(1)
                     self.data_dict.append([data, label])
             except:
-                print("miss!")
+                print(label,path,"miss!",sep=":")
                 
                 
 

@@ -6,6 +6,8 @@ import random
 from . import myenv
 import pandas as pd
 import os,sys
+import numpy as np
+
 
 class trainer:
     def __init__(self, 
@@ -72,18 +74,20 @@ class trainer:
         dbprint(self.model)
         
         self.kondou= None
+        self.x={"train":[],"valid":[]}
+        self.y_acc={"train":[],"valid":[]}
+        self.y_loss={"train":[],"valid":[]}
+        self.num_epochs=0
                 
     def train(self,dataloader_dict,_num_epochs=50,_print=False):
         dbprint=(lambda x:print(x)) if _print else (lambda x:None)
         #エポック数
-        self.num_epochs=_num_epochs
-        self.x={"train":[],"valid":[]}
-        self.y_acc={"train":[],"valid":[]}
-        self.y_loss={"train":[],"valid":[]}
+        num_epochs=self.num_epochs+_num_epochs
+
         
         
-        for epoch in range(self.num_epochs):
-            dbprint('Epoch {}/{}'.format(epoch+1,self.num_epochs))
+        for epoch in range(self.num_epochs,num_epochs):
+            dbprint('Epoch {}/{}'.format(epoch+1,num_epochs))
 
             for phase in ['train','valid']:
                 if phase == 'train':
@@ -166,10 +170,10 @@ class trainer:
     def eval(self, dataloader_dict,mode="kondou"):
         if (mode=="0" or mode=="kondou"):
             self.kondou=np.zeros((len(self.labels),len(self.labels)))
-            model=tr.model
+            model=self.model
             acc=0
             count=0.0
-            for inputs,la in dataloader_dict["train"]:
+            for inputs,la in dataloader_dict["valid"]:
 
                 model.eval()
 
@@ -190,7 +194,7 @@ class trainer:
         
         
         elif (mode=="1"or mode=="kakuritu"):
-            model=tr.model
+            model=self.model
             inputs,la = iter(dataloader_dict["train"]).__next__()
             model.eval()
 
@@ -207,10 +211,11 @@ class trainer:
             print("は未定義です")
 
     def getKondou(self,csvname="a"):
+        mydir=os.path.dirname(os.path.abspath(__file__))
         df=pd.DataFrame(self.kondou)
         df.index=self.labels
         df.columns=self.labels
-        df.to_csv('kondou\\'+csvname+'.csv')
+        df.to_csv(os.path.join(mydir,'kondou', csvname+'.csv'))
         print(df)
     
     def saveModel(self,addname=""):
