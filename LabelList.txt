@@ -1,6 +1,1 @@
-Speech
-Music
-Car
-Siren
-Vehicle
-Animal
+Emergency vehicle

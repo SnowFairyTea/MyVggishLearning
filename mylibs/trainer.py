@@ -7,7 +7,7 @@ from . import myenv
 import pandas as pd
 import os,sys
 import numpy as np
-
+from pathlib import Path
 
 class trainer:
     def __init__(self, 
@@ -195,17 +195,46 @@ class trainer:
         
         elif (mode=="1"or mode=="kakuritu"):
             model=self.model
-            inputs,la = iter(dataloader_dict["train"]).__next__()
             model.eval()
 
-            output = model(inputs)
-            for h in range(len(output)):
-                print("模範解答",self.labels[la[h].item()])
-                ans=[[self.labels[i],output[h][i].item()] for i in range(len(self.labels))]
-                ans.sort(key=lambda x: x[1],reverse=True)
-                [print("{:7}:{:.5f}".format(ans[i][0],ans[i][1])) for i in range(len(ans))]
-                print("----------------")
-        
+            count=0
+
+            for inputs,la in dataloader_dict["train"]:
+            
+
+                output = model(inputs)
+                for h in range(len(output)):
+                    print("模範解答",self.labels[la[h].item()])
+                    ans=[[self.labels[i],output[h][i].item()] for i in range(len(self.labels))]
+                    ans.sort(key=lambda x: x[1],reverse=True)
+                    [print("{:7}:{:.5f}".format(ans[i][0],ans[i][1])) for i in range(len(ans))]
+
+                    plt.figure()
+                    plt.imshow(inputs[h][0].to('cpu').detach().numpy().copy().T)
+                    plt.title("正解："+labels[int(la[h])]+", 回答:"+labels[int(ans[h])])
+                    print("----------------")
+        elif (mode=="2" or mode=="spectrogram"):
+            DIR=os.path.dirname(os.path.abspath(__file__))
+            count=0
+            os.makedirs(os.path.join(DIR,"acc"),exist_ok=True)
+            os.makedirs(os.path.join(DIR,"bat"),exist_ok=True)
+            model=self.model
+            model.eval()
+
+            for inputs,la in dataloader_dict["train"]:
+                outputs=model(inputs)
+                for i in range(len(inputs)):
+                    fig=plt.figure()
+                    ans=int(torch.max(outputs, 1)[1][i])
+                    isans='acc' if int(la[i])== ans else 'acc'#bat
+                    plt.imshow(inputs[i][0].to('cpu').detach().numpy().copy().T)
+                    plt.title(""+str(int(la[i]))+":"+self.labels[ans])
+                    
+                    filepath=os.path.join(DIR,isans,str(count)+".png")
+                    count+=1
+                    fig.savefig(filepath)
+
+
         else:
             print("mode=",mode)
             print("は未定義です")
@@ -220,16 +249,16 @@ class trainer:
     
     def saveModel(self,addname=""):
         mydir=os.path.dirname(os.path.abspath(__file__))
-        classstr=str(self.model.classfilter).replace("\n","").replace(" ","").replace(":","").replace(",","").replace("(","").replace(")","")
-        filename="".join(self.labels)+classstr+addname+".pth"
-        filepath=os.path.join(mydir,"models",filename)
+        classstr=str(self.model.classfilter)
+        filename="".join(self.labels)+classstr.replace(".","")+addname+".pth"
+        filepath=os.path.join(mydir,"models",filename.replace("\n","").replace(" ","").replace(":","").replace(",","").replace("(","").replace(")",""))
         torch.save(self.model.state_dict(), filepath)
 
     def loadModel(self,addname=""):
         mydir=os.path.dirname(os.path.abspath(__file__))
-        classstr=str(self.model.classfilter).replace("\n","").replace(" ","").replace(":","").replace(",","").replace("(","").replace(")","")
-        filename="".join(self.labels)+classstr+addname+".pth"
-        filepath=os.path.join(mydir,"models",filename)
+        classstr=str(self.model.classfilter)
+        filename="".join(self.labels)+classstr.replace(".","")+addname+".pth"
+        filepath=os.path.join(mydir,"models",filename.replace("\n","").replace(" ","").replace(":","").replace(",","").replace("(","").replace(")",""))
         self.model.load_state_dict(torch.load(filepath))
 
 

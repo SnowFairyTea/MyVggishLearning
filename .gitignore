@@ -7,3 +7,4 @@ __pycache__/*
 *.jb
 *.pth
 */kondou/*
+*.png
