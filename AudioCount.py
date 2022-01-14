@@ -16,7 +16,8 @@ def main():
         for label in labels:
             path = os.path.join(target,fo,label,"*")
             ans = len(glob.glob(path))
-            print(fo,label,ans)
+            
+            print(fo.replace("_","\\_"),label,ans,sep=" & ",end=" \\\\\n")
 
 
 
