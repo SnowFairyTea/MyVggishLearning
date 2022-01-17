@@ -8,9 +8,8 @@ def main():
 
     files=["balanced_train","eval","unblanced_train"]
 
-    labels = os.listdir(os.path.join(target,"balanced_train"
-    ))
-
+    #labels = os.listdir(os.path.join(target,"balanced_train"))
+    labels=ReadInputfile("LabelList.txt")
 
     for fo in files:
         for label in labels:
